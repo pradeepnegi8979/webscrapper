@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Mini Web Scraper</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;700&display=swap" rel="stylesheet">
+  <style>
+    body {
+      font-family: "Inter", sans-serif;
+      margin: 40px;
+      background: #fff;
+    }
+     .heading-outer{
+           padding: 100px 0px;
+    text-align: center;
+    background: #000;
+    margin-bottom: 30px;
+     }
+     .heading-outer h2 {
+      color: #fff;
+    }
+    .container {
+      width: 100%;
+      max-width: 1300px;
+      margin: auto;
+    }
+
+    
+
+    form {
+      margin-bottom: 30px;
+      border-radius: 6px;
+      box-shadow: 0 0 10px #ddd;
+    }
+
+    input, select, button {
+      padding: 8px;
+      margin: 8px 0;
+      width: 100%;
+    }
+
+    button {
+      background-color: #000;
+      color: white;
+      border: none;
+      cursor: pointer;
+      font-weight: bold;
+      border-radius: 5px;
+      width: calc(100% - 54px);
+          height: 35px;
+           transition:all .3s;
+    }
+
+    button:hover {
+      background-color: #282828;
+      transition:all .3s;
+    }
+
+    .form-outer {
+      display: grid;
+      width: 100%;
+      justify-content: space-between;
+      grid-template-columns: calc(33.3% - 20px) calc(33.3% - 20px) calc(33.3% - 20px);
+      gap: 20px;
+      padding: 30px;
+    }
+
+    .result {
+      background: #fafafa;
+      padding: 20px;
+    }
+
+    .product-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+      gap: 15px;
+    }
+
+    .product-grid > div {
+      border: solid 1px #28282826;
+      padding: 15px;
+      background: #fff;
+      box-shadow: 0 0 6px rgba(0, 0, 0, 0.08);
+    }
+
+    .price_data {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .price_data p:nth-child(5) {
+      order: -1;
+      margin-top: 0px;
+    }
+
+    .price_data p:nth-child(4) strong {
+      display: none;
+      margin: 0;
+    }
+
+    .price_data p {
+      margin-bottom: 10px;
+    }
+
+    .price_data p a {
+      background: #000;
+      color: #fff;
+      padding: 10px 30px;
+      text-decoration: none;
+      border-radius: 5px;
+    }
+
+    .price_data h4 {
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    p img {
+      width: 100%;
+      height: 220px;
+      object-fit: cover;
+    }
+
+    .result-data ul li {
+      padding-bottom: 8px;
+    }
+
+    /* Stock status & availability styling */
+    .out-of-stock {
+      opacity: 0.6;
+      pointer-events: none;
+    }
+
+    .out-of-stock img {
+      filter: grayscale(1);
+    }
+
+    .out-of-stock h4,
+    .out-of-stock p,
+    .out-of-stock .new-price,
+    .out-of-stock .old-price {
+      color: #999 !important;
+    }
+
+    .out-of-stock a {
+      background-color: #ccc !important;
+      pointer-events: none;
+      cursor: not-allowed;
+    }
+
+    .stock-label {
+      font-size: 13px;
+      font-weight: bold;
+      margin-bottom: 10px;
+      display: inline-block;
+      padding: 4px 10px;
+      border-radius: 20px;
+          width: auto;
+    display: inline-flex;
+    max-width: 60px;
+
+    }
+
+    .stock-label.in-stock {
+      background-color: #e0f8e0;
+      color: green;
+    }
+
+    .stock-label.out-stock {
+      background-color: #f9dede;
+      color: red;
+    }
+
+    .outline .old-price {
+      text-decoration: line-through;
+      color: red;
+      margin-right: 8px;
+    }
+
+    .outline .new-price {
+      font-weight: bold;
+      color: green;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="heading-outer">
+         <h2>Mini Web Scraper</h2>
+    </div>
+    <form method="POST">
+      <div class="form-outer">
+        <div>
+          <label for="url">Website URL:</label><br />
+          <input type="text" name="url" id="url" required style="width: calc(100% - 20px);" />
+        </div>
+        <div>
+          <label for="site_type">Select Website Type:</label><br />
+          <select name="site_type" id="site_type">
+            <option value="generic">Generic Website</option>
+            <option value="woocommerce">WooCommerce Website</option>
+          </select><br />
+        </div>
+        <div>
+          <label style="opacity: 0;">Search</label>
+          <button type="submit">SCRAPE</button>
+        </div>
+      </div>
+    </form>
+
+    {% if result %}
+    <div class="result">
+      <div class="result-data">
+        <h3>Scraped Data:</h3>
+         {# Generic Website Result #}
+         {% if result is mapping and result.title is defined %}
+           <h4>Page Title:</h4>
+           <p>{{ result.title }}</p>
+           <h4>Headings:</h4>
+          {% for tag, tags in result.headings.items() %}
+            <strong>{{ tag.upper() }}</strong>
+            <ul>
+              {% for h in tags %}
+                <li>{{ h }}</li>
+              {% endfor %}
+            </ul>
+          {% endfor %}
+
+          <h4>Paragraphs:</h4>
+          <ul>
+            {% for p in result.paragraphs %}
+              <li>{{ p }}</li>
+            {% endfor %}
+          </ul>
+
+          <h4>Links:</h4>
+          <ul>
+            {% for link in result.links %}
+              <li><a href="{{ link.url }}" target="_blank">{{ link.text or link.url }}</a></li>
+            {% endfor %}
+          </ul>
+
+        {# WooCommerce Product Grid #}
+        {% elif result is iterable and result[0] is mapping and result[0].title is defined %}
+          <div class="product-grid">
+            {% for product in result %}
+              {% set price_parts = product.price.split('£') if '£' in product.price else [] %}
+              {% set is_out_of_stock = product.stock is defined and product.stock|lower == 'out of stock' %}
+
+              <div class="price_data {% if price_parts|length >= 3 %}outline{% endif %} {% if is_out_of_stock %}out-of-stock{% endif %}">
+                <h4>{{ product.title }}</h4>
+
+                <span class="stock-label {% if is_out_of_stock %}out-stock{% else %}in-stock{% endif %}">
+                  {% if is_out_of_stock %}Out of Stock{% else %}In Stock{% endif %}
+                </span>
+
+                <p>
+                  {% if price_parts|length >= 3 %}
+                    <span class="old-price">£{{ price_parts[1].split('.')[0] }}.{{ price_parts[1].split('.')[1][:2] }}</span>
+                    <span class="new-price">£{{ price_parts[2].split('.')[0] }}.{{ price_parts[2].split('.')[1][:2] }}</span>
+                  {% else %}
+                    {{ product.price }}
+                  {% endif %}
+                </p>
+
+                <p style="opacity:0; visibility:hidden;">{{ product.description }}</p>
+                <p><img src="{{ product.image }}" alt="{{ product.title }}"></p>
+                <p><a href="{{ product.url }}" target="_blank">{% if is_out_of_stock %}Unavailable{% else %}View Product{% endif %}</a></p>
+              </div>
+            {% endfor %}
+          </div>
+
+        {# Error string #}
+        {% elif result is string %}
+          <p>{{ result }}</p>
+
+        {# Fallback #}
+        {% else %}
+          <p>No data found or unsupported result format.</p>
+        {% endif %}
+      </div>
+    </div>
+    {% endif %}
+  </div>
+</body>
+</html>
