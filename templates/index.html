@@ -3,147 +3,171 @@
 <head>
   <meta charset="UTF-8" />
   <title>Mini Web Scraper</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/js/all.min.js"></script>
-  <style>
-    .copy-btn {
-      background: none;
-      border: none;
-      cursor: pointer;
-      margin-left: 5px;
-      color: #555;
-    }
-    .copy-btn:hover {
-      color: #000;
-    }
-    .scroll-table {
-      max-height: 400px;
-      overflow-y: auto;
-      margin-top: 10px;
-      border: 1px solid #ccc;
-    }
-    .scroll-table table {
-      border-collapse: collapse;
-      width: 100%;
-    }
-    .scroll-table th, .scroll-table td {
-      border: 1px solid #ccc;
-      padding: 8px;
-    }
-    .scroll-table th {
-      background: #f7f7f7;
-    }
-    .image-gallery img {
-      max-width: 150px;
-      margin: 8px;
-    }
-  </style>
 </head>
 <body>
-
-  <div class="container">
-    <h2>AI Scraper for Instant Insights</h2>
-
-    <form method="POST">
-      <input type="text" name="url" placeholder="Enter website URL" required value="{{ request.form.get('url', '') }}">
-      <select name="site_type">
-        <option value="generic" {% if site_type == 'generic' %}selected{% endif %}>Generic</option>
-        <option value="woocommerce" {% if site_type == 'woocommerce' %}selected{% endif %}>WooCommerce</option>
-        <option value="sitemap" {% if site_type == 'sitemap' %}selected{% endif %}>Sitemap</option>
-      </select>
-      <button type="submit">Scrape</button>
-    </form>
-
-    {% if result %}
-    <div class="results">
-      <h3>Results:</h3>
-
-      {% if site_type == 'generic' and result.title %}
-        <h4>Page Title:</h4>
-        <p>{{ result.title }}</p>
-
-        <h4>Headings:</h4>
-        <div class="scroll-table">
-          <table>
-            <tr><th>Tag</th><th>Content</th></tr>
-            {% for tag, tags in result.headings.items() %}
-              {% for h in tags %}
-                <tr>
-                  <td>{{ tag.upper() }}</td>
-                  <td>{{ h }}</td>
-                </tr>
-              {% endfor %}
-            {% endfor %}
-          </table>
-        </div>
-
-        <h4>Paragraphs:</h4>
-        <div class="scroll-table">
-          <table>
-            <tr><th>#</th><th>Text</th></tr>
-            {% for p in result.paragraphs %}
-              <tr><td>{{ loop.index }}</td><td>{{ p }}</td></tr>
-            {% endfor %}
-          </table>
-        </div>
-
-        <h4>Links:</h4>
-        <div class="scroll-table">
-          <table>
-            <tr><th>#</th><th>Link</th><th>Copy</th></tr>
-            {% for link in result.links %}
-              <tr>
-                <td>{{ loop.index }}</td>
-                <td><a href="{{ link.url }}" target="_blank">{{ link.text or link.url }}</a></td>
-                <td>
-                  <button class="copy-btn" onclick="copyToClipboard('{{ link.url }}')">
-                    <i class="fas fa-copy"></i>
-                  </button>
-                </td>
-              </tr>
-            {% endfor %}
-          </table>
-        </div>
-
-        <h4>Images:</h4>
-        <div class="image-gallery">
-          {% for img in result.images %}
-            <img src="{{ img }}" alt="Image" referrerpolicy="no-referrer">
-          {% endfor %}
-        </div>
-
-      {% elif site_type == 'woocommerce' and result[0].title %}
-        <div class="product-grid">
-          {% for product in result %}
-            <div class="product">
-              <h4>{{ product.title }}</h4>
-              <img src="{{ product.image }}" alt="Image" referrerpolicy="no-referrer">
-              <p><strong>Price:</strong> {{ product.price }}</p>
-              {% if product.stock %}
-                <p><strong>Stock:</strong> {{ product.stock }}</p>
-              {% endif %}
-              <a href="{{ product.url }}" target="_blank">View Product</a>
-            </div>
-          {% endfor %}
-        </div>
-
-      {% elif result is string %}
-        <p>{{ result }}</p>
-
-      {% else %}
-        <p>No data found or unsupported format.</p>
-      {% endif %}
-    </div>
-    {% endif %}
+  <div class="background">
+    <div class="blob blob1"></div>
+    <div class="blob blob2"></div>
+    <div class="blob blob3"></div>
   </div>
 
+  <div class="container">
+    <div class="hero_banner">
+      <img src="{{ url_for('static', filename='hero-background-top.png') }}" alt="Hero background">
+    </div>
+
+    <div class="heading-outer">
+      <h2 class="text-greadient">AI Scraper for Instant Insights</h2>
+      <p>This smart scraper extracts key data from generic and WooCommerce <br> sites—like products, headings, and links—using Python, Flask, and BeautifulSoup, <br>all without paid tools or APIs.</p>
+    </div>
+
+    <div class="sticky-scroll">
+      <form method="POST" class="border-gradient border-gradient-purple">
+        <div class="form-outer">
+          <div>
+            <label for="url">Website URL:</label>
+            <input type="text" name="url" id="url" required
+                   style="width: calc(100% - 20px);"
+                   value="{{ request.form.get('url', '') }}" placeholder="Enter Your URL">
+          </div>
+          <div>
+            <label for="site_type">Select Website Type:</label>
+            <select name="site_type" id="site_type">
+              <option value="generic" {% if site_type == 'generic' %}selected{% endif %}>Generic Website</option>
+              <option value="woocommerce" {% if site_type == 'woocommerce' %}selected{% endif %}>WooCommerce Website</option>
+              <option value="sitemap" {% if site_type == 'sitemap' %}selected{% endif %}>Sitemap URL</option>
+            </select>
+          </div>
+          <div>
+            <label for="text" style="opacity: 0;">Search</label>
+            <button class="cstm-btn" type="submit">SCRAPE</button>
+          </div>
+          <div>
+            <label for="text" style="opacity: 0;">Search</label>
+            <a href="/" class="reset-btn">New URL</a>
+          </div>
+        </div>
+      </form>
+
+      {% if result %}
+      <div class="result">
+        <div class="result-data">
+          <h3>
+            {% if site_type == 'generic' %}
+              Generic Website Scraped Data
+            {% elif site_type == 'woocommerce' %}
+              WooCommerce Product Data
+            {% elif site_type == 'sitemap' %}
+              Sitemap Links Extracted
+            {% else %}
+              Scraped Data
+            {% endif %}
+          </h3>
+
+          {# Generic Website Result #}
+          {% if result is mapping and result.title is defined %}
+            <h4>Page Title:</h4>
+            <p>{{ result.title }}</p>
+
+            <h4>Headings:</h4>
+            {% for tag, tags in result.headings.items() %}
+              <strong>{{ tag.upper() }}</strong>
+              <ul>
+                {% for h in tags %}
+                  <li>{{ h }}</li>
+                {% endfor %}
+              </ul>
+            {% endfor %}
+
+            <h4>Paragraphs:</h4>
+            <ul>
+              {% for p in result.paragraphs %}
+                <li>{{ p }}</li>
+              {% endfor %}
+            </ul>
+
+            <div class="linkspage">
+              <h4>Links:</h4>
+              <ul>
+                {% for link in result.links %}
+                  <li style="display: flex; align-items: center; gap: 10px;">
+                    <a href="{{ link.url }}" target="_blank">{{ link.text or link.url }}</a>
+                    <button onclick="copyToClipboard('{{ link.url }}')" class="copy-link" title="Copy Link">
+                      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="12" height="12" fill="rgba(252,252,252,1)"><path d="M15 14L14.8834 14.0067C14.4243 14.0601 14.0601 14.4243 14.0067 14.8834L14 15V21H3.99826C3.44694 21 3 20.5551 3 20.0066V3.9934C3 3.44476 3.44495 3 3.9934 3H20.0066C20.5552 3 21 3.44749 21 3.9985V14H15ZM21 16L16 20.997V16H21Z"></path></svg>
+                    </button>
+                  </li>
+                {% endfor %}
+              </ul>
+            </div>
+
+            <h2>Images</h2>
+            <div class="image-gallery">
+              {% for img in result.images %}
+                <img src="{{ img }}" alt="Image" style="max-width: 200px; margin: 10px;" referrerpolicy="no-referrer">
+              {% endfor %}
+            </div>
+
+          {# WooCommerce Product Grid #}
+          {% elif result is iterable and result[0] is mapping and result[0].title is defined %}
+            <div class="product-grid">
+              {% for product in result %}
+                {% set price_parts = product.price.split('£') if '£' in product.price else [] %}
+                {% set is_out_of_stock = product.stock is defined and product.stock|lower == 'out of stock' %}
+
+                <div class="price_data {% if price_parts|length >= 3 %}outline{% endif %} {% if is_out_of_stock %}out-of-stock{% endif %}">
+                  <h4>{{ product.title }}</h4>
+
+                  <span class="stock-label {% if is_out_of_stock %}out-stock{% else %}in-stock{% endif %}">
+                    {% if is_out_of_stock %}Out of Stock{% else %}In Stock{% endif %}
+                  </span>
+
+                  <p>
+                    {% if price_parts|length >= 3 %}
+                      <span class="old-price">£{{ price_parts[1].split('.')[0] }}.{{ price_parts[1].split('.')[1][:2] }}</span>
+                      <span class="new-price">£{{ price_parts[2].split('.')[0] }}.{{ price_parts[2].split('.')[1][:2] }}</span>
+                    {% else %}
+                      {{ product.price }}
+                    {% endif %}
+                  </p>
+
+                  <p style="opacity:0; visibility:hidden;">{{ product.description }}</p>
+                  <p><img src="{{ product.image }}" alt="{{ product.title }}" referrerpolicy="no-referrer"></p>
+                  <p>
+                    <a href="{{ product.url }}" target="_blank" {% if is_out_of_stock %}class="disabled"{% endif %}>
+                      {% if is_out_of_stock %}Unavailable{% else %}View Product{% endif %}
+                    </a>
+                  </p>
+                </div>
+              {% endfor %}
+            </div>
+
+          {# Error string #}
+          {% elif result is string %}
+            <p>{{ result }}</p>
+
+          {# Fallback #}
+          {% else %}
+            <p>No data found or unsupported result format.</p>
+          {% endif %}
+        </div>
+      </div>
+      {% endif %}
+    </div>
+  </div>
+
+  <!-- 📋 Copy to Clipboard Script -->
   <script>
     function copyToClipboard(text) {
       navigator.clipboard.writeText(text).then(() => {
-        alert("Link copied: " + text);
+       
+      }).catch(err => {
+        console.error('Copy failed', err);
       });
     }
   </script>
-
 </body>
 </html>

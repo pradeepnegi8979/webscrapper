@@ -1,44 +1,60 @@
-from flask import Flask, render_template, request
-from scraper.generic_scraper import scrape_generic
-from scraper.woocommerce_scraper import scrape_woocommerce
-from scraper.sitemap_scraper import scrape_sitemap
+import requests
+from bs4 import BeautifulSoup
+from urllib.parse import urljoin
 
-app = Flask(__name__)
+def scrape_generic(url):
+    try:
+        headers = {
+            "User-Agent": (
+                "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
+                "AppleWebKit/537.36 (KHTML, like Gecko) "
+                "Chrome/125.0.0.0 Safari/537.36"
+            )
+        }
 
-@app.route("/", methods=["GET", "POST"])
-def index():
-    result = None
-    site_type = None  # Track selected site type
-    url = ""
+        response = requests.get(url, headers=headers, timeout=10)
+        response.raise_for_status()
 
-    if request.method == "POST":
-        input_url = request.form.get("url", "").strip().lower()
-        site_type = request.form.get("site_type")
+        soup = BeautifulSoup(response.text, 'lxml')
 
-        # Auto format the URL
-        if not input_url.startswith("http://") and not input_url.startswith("https://"):
-            if "." not in input_url:
-                # Treat as search keyword, build domain
-                formatted = input_url.replace(" ", "")
-                input_url = f"https://{formatted}.com"
-            else:
-                input_url = f"https://{input_url}"
+        # Page Title
+        title = soup.title.string.strip() if soup.title and soup.title.string else ''
 
-        url = input_url
+        # Headings grouped
+        headings = {
+            'h1': [h.get_text(strip=True) for h in soup.find_all('h1')],
+            'h2': [h.get_text(strip=True) for h in soup.find_all('h2')],
+            'h3': [h.get_text(strip=True) for h in soup.find_all('h3')],
+        }
 
-        try:
-            if site_type == "generic":
-                result = scrape_generic(url)
-            elif site_type == "woocommerce":
-                result = scrape_woocommerce(url)
-            elif site_type == "sitemap":
-                result = scrape_sitemap(url)
-            else:
-                result = "Invalid site type selected."
-        except Exception as e:
-            result = f"Error scraping: {str(e)}"
+        # Paragraphs (only non-empty)
+        paragraphs = [
+            p.get_text(strip=True) for p in soup.find_all('p') if p.get_text(strip=True)
+        ]
 
-    return render_template("index.html", result=result, site_type=site_type)
+        # Links (with proper full URL and text fallback)
+        links = []
+        for a in soup.find_all('a', href=True):
+            full_url = urljoin(url, a['href'])
+            text = a.get_text(strip=True) or full_url
+            links.append({'url': full_url, 'text': text})
 
-if __name__ == "__main__":
-    app.run(debug=True)
+        # Images (check for base64/svg/data placeholders)
+        images = []
+        for img in soup.find_all('img'):
+            img_url = img.get('src') or img.get('data-src') or img.get('data-srcset')
+            if img_url and not img_url.startswith("data:image"):
+                img_url = img_url.split()[0]
+                full_img_url = urljoin(url, img_url)
+                images.append(full_img_url)
+
+        return {
+            'title': title,
+            'headings': headings,
+            'paragraphs': paragraphs,
+            'links': links,
+            'images': images
+        }
+
+    except requests.exceptions.RequestException as e:
+        return {'error': f'Failed to fetch {url}: {str(e)}'}
