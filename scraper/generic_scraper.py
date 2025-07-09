@@ -1,95 +1,44 @@
-import requests
-from bs4 import BeautifulSoup
-from urllib.parse import urljoin
+from flask import Flask, render_template, request
+from scraper.generic_scraper import scrape_generic
+from scraper.woocommerce_scraper import scrape_woocommerce
+from scraper.sitemap_scraper import scrape_sitemap
 
-def scrape_generic(url):
-    try:
-<<<<<<< HEAD
-        response = requests.get(url)
-        soup = BeautifulSoup(response.text, 'html.parser')
+app = Flask(__name__)
 
-        # Extract Title
-        title = soup.title.string.strip() if soup.title else 'No Title Found'
+@app.route("/", methods=["GET", "POST"])
+def index():
+    result = None
+    site_type = None  # Track selected site type
+    url = ""
 
-        # Extract Headings
-        headings = {
-            "h1": [h.get_text(strip=True) for h in soup.find_all("h1")],
-            "h2": [h.get_text(strip=True) for h in soup.find_all("h2")],
-            "h3": [h.get_text(strip=True) for h in soup.find_all("h3")],
-        }
+    if request.method == "POST":
+        input_url = request.form.get("url", "").strip().lower()
+        site_type = request.form.get("site_type")
 
-        # Extract first 5 paragraphs
-        paragraphs = [p.get_text(strip=True) for p in soup.find_all("p")[:5]]
+        # Auto format the URL
+        if not input_url.startswith("http://") and not input_url.startswith("https://"):
+            if "." not in input_url:
+                # Treat as search keyword, build domain
+                formatted = input_url.replace(" ", "")
+                input_url = f"https://{formatted}.com"
+            else:
+                input_url = f"https://{input_url}"
 
-        # Extract internal and external links
-        links = []
-        for a in soup.find_all("a", href=True):
-            link_text = a.get_text(strip=True)
-            full_url = urljoin(url, a['href'])
-            links.append({"text": link_text, "url": full_url})
+        url = input_url
 
-        return {
-            "title": title,
-            "headings": headings,
-            "paragraphs": paragraphs,
-            "links": links[:10]  # limit to 10 for brevity
-        }
+        try:
+            if site_type == "generic":
+                result = scrape_generic(url)
+            elif site_type == "woocommerce":
+                result = scrape_woocommerce(url)
+            elif site_type == "sitemap":
+                result = scrape_sitemap(url)
+            else:
+                result = "Invalid site type selected."
+        except Exception as e:
+            result = f"Error scraping: {str(e)}"
 
-    except Exception as e:
-        return {"error": str(e)}
-=======
-        headers = {
-            "User-Agent": (
-                "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
-                "AppleWebKit/537.36 (KHTML, like Gecko) "
-                "Chrome/125.0.0.0 Safari/537.36"
-            )
-        }
+    return render_template("index.html", result=result, site_type=site_type)
 
-        response = requests.get(url, headers=headers, timeout=10)
-        response.raise_for_status()
-
-        soup = BeautifulSoup(response.text, 'lxml')
-
-        # Page Title
-        title = soup.title.string.strip() if soup.title and soup.title.string else ''
-
-        # Headings grouped
-        headings = {
-            'h1': [h.get_text(strip=True) for h in soup.find_all('h1')],
-            'h2': [h.get_text(strip=True) for h in soup.find_all('h2')],
-            'h3': [h.get_text(strip=True) for h in soup.find_all('h3')],
-        }
-
-        # Paragraphs (only non-empty)
-        paragraphs = [
-            p.get_text(strip=True) for p in soup.find_all('p') if p.get_text(strip=True)
-        ]
-
-        # Links (with proper full URL and text fallback)
-        links = []
-        for a in soup.find_all('a', href=True):
-            full_url = urljoin(url, a['href'])
-            text = a.get_text(strip=True) or full_url
-            links.append({'url': full_url, 'text': text})
-
-        # Images (check for base64/svg/data placeholders)
-        images = []
-        for img in soup.find_all('img'):
-            img_url = img.get('src') or img.get('data-src') or img.get('data-srcset')
-            if img_url and not img_url.startswith("data:image"):
-                img_url = img_url.split()[0]
-                full_img_url = urljoin(url, img_url)
-                images.append(full_img_url)
-
-        return {
-            'title': title,
-            'headings': headings,
-            'paragraphs': paragraphs,
-            'links': links,
-            'images': images
-        }
-
-    except requests.exceptions.RequestException as e:
-        return {'error': f'Failed to fetch {url}: {str(e)}'}
->>>>>>> 89f51f3 (Updated scraper code from new system)
+if __name__ == "__main__":
+    app.run(debug=True)
