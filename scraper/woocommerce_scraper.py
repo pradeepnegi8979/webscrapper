@@ -1,7 +1,7 @@
 import requests
 from bs4 import BeautifulSoup
 from urllib.parse import urljoin
-from concurrent.futures import ThreadPoolExecutor, as_completed
+from concurrent.futures import ThreadPoolExecutor
 
 def fetch_detail_price(product_url, headers):
     try:
@@ -15,6 +15,20 @@ def fetch_detail_price(product_url, headers):
         return detail_price.get_text(strip=True) if detail_price else "N/A"
     except:
         return "N/A"
+
+# ✅ Fetch description from detail page
+def fetch_description(product_url, headers):
+    try:
+        detail_response = requests.get(product_url, headers=headers, timeout=10)
+        detail_soup = BeautifulSoup(detail_response.text, 'html.parser')
+        description = (
+            detail_soup.select_one('.woocommerce-product-details__short-description') or
+            detail_soup.select_one('.product-short-description') or
+            detail_soup.select_one('.entry-summary')
+        )
+        return description.get_text(strip=True) if description else ""
+    except:
+        return ""
 
 def scrape_woocommerce(url):
     try:
@@ -57,29 +71,32 @@ def scrape_woocommerce(url):
 
                     if price:
                         final_price = price.get_text(strip=True)
+                        description = fetch_description(product_url, headers)
                         product_data.append({
                             "title": title.get_text(strip=True),
                             "price": final_price,
-                            "description": "",
+                            "description": description,
                             "image": urljoin(url, img_url),
                             "url": product_url
                         })
                     else:
-                        # Schedule detail page fetch
+                        # Fallback to background fetching
                         tasks.append({
                             "title": title.get_text(strip=True),
                             "image": urljoin(url, img_url),
                             "url": product_url,
-                            "future": executor.submit(fetch_detail_price, product_url, headers)
+                            "price_future": executor.submit(fetch_detail_price, product_url, headers),
+                            "desc_future": executor.submit(fetch_description, product_url, headers)
                         })
 
-            # Add fetched detail prices
+            # Collect future results
             for task in tasks:
-                price = task["future"].result()
+                price = task["price_future"].result()
+                description = task["desc_future"].result()
                 product_data.append({
                     "title": task["title"],
                     "price": price,
-                    "description": "",
+                    "description": description,
                     "image": task["image"],
                     "url": task["url"]
                 })

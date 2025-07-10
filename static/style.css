@@ -1,4 +1,7 @@
 
+:root{
+  --theme-color:#6d38ff78;
+}
 body {
   /* font-family: "Inter", sans-serif; */
   font-family: Rebond Grotesque, system-ui, -apple-system, BlinkMacSystemFont,
@@ -59,7 +62,7 @@ h3 {
 }
 .container {
   width: 100%;
-  max-width: 1100px;
+  max-width: 1300px;
   margin: auto;
 }
 
@@ -254,7 +257,7 @@ p img {
   color: red;
 }
 
-.outline .old-price {
+.outline .old-price, .old-price {
   text-decoration: line-through;
   color: red;
   margin-right: 8px;
@@ -459,3 +462,87 @@ p img {
 .linkspage ul li:hover {text-decoration:underline;}
 .linkspage ul li button{ opacity:0; visibility:hidden; cursor:pointer;}
 .linkspage ul li:hover button{ opacity:1; visibility:visible;}
+
+
+/*--=================================*/
+
+.woocommerce-table{width:100%; padding:0;}
+.woocommerce-table  thead {
+ 
+    background: linear-gradient(95.25deg, #b649ea61 0.54%, #6c38ff4f 97.46%);
+}
+.woocommerce-table  tbody {
+ 
+    background:#ffffff1a ;
+}
+.woocommerce-table  thead  tr th{padding:15px!important;}
+.woocommerce-table  thead  tr th,
+.woocommerce-table  tbody  tr td {border:solid 1px var(--theme-color); padding:10px; border-right:none; text-align:left; }
+.woocommerce-table  thead  tr th:last-child,
+.woocommerce-table  tbody  tr td:last-child{border:solid 1px var(--theme-color)!important; text-align:left;}  
+
+.woocommerce-table  tbody tr td{ border-top:none;}  
+.woocommerce-table  tbody tr td img {max-width:50px!important;}
+.woocommerce-table  tbody tr td a{color:#fff; } 
+.woocommerce-table  thead  tr th:nth-child(1){border-radius:15px 0px 0px 0px;}
+.woocommerce-table  thead  tr th:last-child{border-radius:0px 15px 0px 0px;}
+.table-responsive {}
+
+
+
+
+.modal {
+  display: none;
+  position: fixed;
+  z-index: 999;
+  left: 0; top: 0;
+  width: 100%; height: 100%;
+  overflow: auto;
+  background-color: rgba(0,0,0,0.6);
+}
+
+.modal-content {
+  background-color: #fff;
+  margin: 10% auto;
+  padding: 20px;
+  max-width: 500px;
+  border-radius: 10px;
+  position: relative;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+}
+
+.modal-content img {
+  max-width: 100%;
+  margin-bottom: 15px;
+}
+
+.close {
+    position: absolute;
+    right: 15px;
+    top: 10px;
+    font-size: 18px;
+    font-weight: bold;
+    cursor: pointer;
+    width: 30px;
+    height: 30px;
+    border-radius: 100%;
+    background: #6d38ff;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    color: #fff;
+    padding: 0px;
+    margin: 0px;
+    line-height:0px;
+}
+
+#productModal{margin:auto;}
+.text-center { text-align:center; background:#e5e5e5}
+
+#modalLink{
+  background: #6d38ff;
+    padding: 6px 16px;
+    text-decoration: none;
+    color: #fff;
+    border-radius: 5px;
+}

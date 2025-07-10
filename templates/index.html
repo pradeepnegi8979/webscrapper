@@ -111,39 +111,55 @@
               {% endfor %}
             </div>
 
-          {# WooCommerce Product Grid #}
-          {% elif result is iterable and result[0] is mapping and result[0].title is defined %}
-            <div class="product-grid">
-              {% for product in result %}
-                {% set price_parts = product.price.split('£') if '£' in product.price else [] %}
-                {% set is_out_of_stock = product.stock is defined and product.stock|lower == 'out of stock' %}
+          {# WooCommerce Product Table View #}
+          <!-- Inside the WooCommerce table section -->
+{% elif result is iterable and result[0] is mapping and result[0].title is defined %}
+<div class="table-responsive">
+  <table class="woocommerce-table" cellpadding="0" cellspacing="0">
+    <thead>
+      <tr>
+        <th>S.No</th>
+        <th>Image</th>
+        <th>Title</th>
+        <th>Price</th>
+        <th>Stock</th>
+        <th>Action</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for product in result %}
+        {% set price_parts = product.price.split('£') if '£' in product.price else [] %}
+        {% set is_out_of_stock = product.stock is defined and product.stock|lower == 'out of stock' %}
+        <tr class="{% if is_out_of_stock %}out-of-stock{% endif %}">
+          <td>{{ loop.index }}</td>
+          <td>
+            <img src="{{ product.image }}" alt="{{ product.title }}" style="width: 100px;" referrerpolicy="no-referrer">
+          </td>
+          <td>{{ product.title }}</td>
+          <td>
+            {% if price_parts|length >= 3 %}
+              <span class="old-price">£{{ price_parts[1].split('.')[0] }}.{{ price_parts[1].split('.')[1][:2] }}</span><br>
+              <span class="new-price">£{{ price_parts[2].split('.')[0] }}.{{ price_parts[2].split('.')[1][:2] }}</span>
+            {% else %}
+              {{ product.price }}
+            {% endif %}
+          </td>
+          <td>
+            {% if is_out_of_stock %}
+              <span class="stock-label out-stock">Out of Stock</span>
+            {% else %}
+              <span class="stock-label in-stock">In Stock</span>
+            {% endif %}
+          </td>
+          <td>
+            <span type="button" onclick="openModal({{ loop.index0 }})">View Product</span>
+          </td>
+        </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
 
-                <div class="price_data {% if price_parts|length >= 3 %}outline{% endif %} {% if is_out_of_stock %}out-of-stock{% endif %}">
-                  <h4>{{ product.title }}</h4>
-
-                  <span class="stock-label {% if is_out_of_stock %}out-stock{% else %}in-stock{% endif %}">
-                    {% if is_out_of_stock %}Out of Stock{% else %}In Stock{% endif %}
-                  </span>
-
-                  <p>
-                    {% if price_parts|length >= 3 %}
-                      <span class="old-price">£{{ price_parts[1].split('.')[0] }}.{{ price_parts[1].split('.')[1][:2] }}</span>
-                      <span class="new-price">£{{ price_parts[2].split('.')[0] }}.{{ price_parts[2].split('.')[1][:2] }}</span>
-                    {% else %}
-                      {{ product.price }}
-                    {% endif %}
-                  </p>
-
-                  <p style="opacity:0; visibility:hidden;">{{ product.description }}</p>
-                  <p><img src="{{ product.image }}" alt="{{ product.title }}" referrerpolicy="no-referrer"></p>
-                  <p>
-                    <a href="{{ product.url }}" target="_blank" {% if is_out_of_stock %}class="disabled"{% endif %}>
-                      {% if is_out_of_stock %}Unavailable{% else %}View Product{% endif %}
-                    </a>
-                  </p>
-                </div>
-              {% endfor %}
-            </div>
 
           {# Error string #}
           {% elif result is string %}
@@ -158,7 +174,55 @@
       {% endif %}
     </div>
   </div>
+<!-- Product Modal -->
+<div id="productModal" class="modal" style="display:none;">
+  <div class="modal-content">
+    <span class="close" onclick="closeModal()">&times;</span>
+    <div class="text-center">
+    <img id="modalImage" src="" alt="Product Image" style="max-width: 300px; margin-bottom: 10px;">
+    </div>
+    <h4 id="modalTitle"></h4>
+    <p id="modalPrice"></p>
+    <p id="modalDesc"></p>
+    <a id="modalLink" href="#" target="_blank" class="view-btn">View Full Product</a>
+  </div>
+</div>
 
-  
+  <!-- 📋 Copy to Clipboard Script -->
+  <script>
+    function copyToClipboard(text) {
+      navigator.clipboard.writeText(text).then(() => {
+        // Optional success feedback
+      }).catch(err => {
+        console.error('Copy failed', err);
+      });
+    }
+  </script>
+  <script>
+  const products = {{ result | tojson | safe }};
+
+  function openModal(index) {
+    const product = products[index];
+    document.getElementById('modalTitle').innerText = product.title;
+    document.getElementById('modalImage').src = product.image;
+    document.getElementById('modalPrice').innerText = product.price;
+    document.getElementById('modalDesc').innerText = product.description || 'No description available';
+    document.getElementById('modalLink').href = product.url;
+
+    document.getElementById('productModal').style.display = 'block';
+  }
+
+  function closeModal() {
+    document.getElementById('productModal').style.display = 'none';
+  }
+
+  window.onclick = function(event) {
+    const modal = document.getElementById('productModal');
+    if (event.target === modal) {
+      closeModal();
+    }
+  };
+</script>
+
 </body>
 </html>
