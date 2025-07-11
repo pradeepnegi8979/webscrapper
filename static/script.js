@@ -60,3 +60,20 @@ function paginateTable(tableId, rowsPerPage = 20) {
       if (table) paginateTable("genericTable", 20);
     };
 
+
+  window.addEventListener('scroll', function() {
+    const el = document.querySelector('.sticky-scroll');
+    const offset = 50;
+
+    if (window.scrollY >= el.offsetTop - offset) {
+      el.style.position = 'fixed';
+      el.style.top = offset + 'px';
+      el.style.width = '100%'; // preserve layout
+      el.style.zIndex = 1000;
+    } else {
+      el.style.position = '';
+      el.style.top = '';
+      el.style.width = '';
+    }
+  });
+

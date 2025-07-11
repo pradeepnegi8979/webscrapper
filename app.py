@@ -5,13 +5,6 @@ from scraper.sitemap_scraper import scrape_sitemap
 
 app = Flask(__name__)
 
-# 🔁 Keyword to URL mapping
-custom_mappings = {
-    "shockwave technologies": "https://www.shockwavetechnologies.com",
-    "shockwave": "https://www.shockwavetechnologies.com",
-    # Aap yahan aur bhi add kar sakte ho
-}
-
 @app.route("/", methods=["GET", "POST"])
 def index():
     result = None
@@ -21,11 +14,7 @@ def index():
         input_url = request.form.get("url").strip().lower()
         site_type = request.form.get("site_type")
 
-        # ✅ Step 1: Check mapping first
-        if input_url in custom_mappings:
-            input_url = custom_mappings[input_url]
-
-        # ✅ Step 2: Format raw inputs (same as before)
+        # ✅ Step 1: Format raw inputs
         if not input_url.startswith("http://") and not input_url.startswith("https://"):
             if "." not in input_url:
                 input_url = f"https://{input_url}.com"
@@ -34,7 +23,7 @@ def index():
 
         url = input_url
 
-        # ✅ Step 3: Call scraper based on site_type
+        # ✅ Step 2: Call scraper based on site_type
         if site_type == "generic":
             result = scrape_generic(url)
         elif site_type == "woocommerce":

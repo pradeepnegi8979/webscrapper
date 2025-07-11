@@ -16,6 +16,7 @@
   </div>
 
   <div class="container">
+    <div class="roatate-content">
     <div class="hero_banner">
       <img src="{{ url_for('static', filename='hero-background-top.png') }}" alt="Hero background">
     </div>
@@ -24,7 +25,8 @@
       <h2 class="text-greadient">AI Scraper for Instant Insights</h2>
       <p>This smart scraper extracts key data from generic and WooCommerce <br> sites—like products, headings, and links—using Python, Flask, and BeautifulSoup, <br>all without paid tools or APIs.</p>
     </div>
-
+    <div style="height:100px; display:block;"></div>
+    </div>
     <div class="sticky-scroll">
       <form method="POST" class="border-gradient border-gradient-purple">
         <div class="form-outer">
@@ -152,7 +154,7 @@
             {% endif %}
           </td>
           <td>
-            <span type="button" onclick="openModal({{ loop.index0 }})">View Product</span>
+            <span style="cursor:pointer;" onclick="openModal({{ loop.index0 }})">View Product</span>
           </td>
         </tr>
       {% endfor %}

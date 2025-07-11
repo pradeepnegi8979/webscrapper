@@ -381,12 +381,9 @@ p img {
 .sticky-scroll{
   position:sticky;
   top:50px;
-  padding-top:100px;
+  
 }
-.result{
-  height:600px;
-  overflow:auto;
-}
+
 
 .custom-select {
   position: relative;
@@ -486,7 +483,28 @@ p img {
 .woocommerce-table  tbody tr td a{color:#fff; } 
 .woocommerce-table  thead  tr th:nth-child(1){border-radius:15px 0px 0px 0px;}
 .woocommerce-table  thead  tr th:last-child{border-radius:0px 15px 0px 0px;}
-.table-responsive {}
+.table-responsive {position:relative;}
+.table-responsive:before {
+  width:100%;
+  height:100%;
+  content:'';
+  position:absolute;
+   background:url(../static/greadient-bg-n.png); 
+   background-repeat:no-repeat;
+   background-size:50%;
+    animation: rotateImageB 30s linear infinite;
+    opacity:0.5;
+  }
+
+ @keyframes rotateImageB {
+	from {
+		transform: rotate(0deg);
+	}
+
+	to {
+		transform: rotate(360deg);
+	}
+}
 
 
 
